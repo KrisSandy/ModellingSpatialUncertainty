@@ -10,7 +10,7 @@ import seaborn as sns
 # Author : Krishna Sandeep
 
 # This class provides functions to perform 
-# 1) Notmality test on the intrinsic parameters data
+# 1) Normality test on the intrinsic parameters data
 # 2) Fit the individual intrinsic parameters data with KDE
 # 3) Fit all the intrinsic parameters with KDE  
 # 4) Print the covariance matrix of the fitted 6D KDE
