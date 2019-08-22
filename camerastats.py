@@ -10,7 +10,7 @@ import seaborn as sns
 # Author : Krishna Sandeep
 
 # This class provides functions to perform 
-# 1) Normality test on the intrinsic parameters data
+# 1) Notmality test on the intrinsic parameters data
 # 2) Fit the individual intrinsic parameters data with KDE
 # 3) Fit all the intrinsic parameters with KDE  
 # 4) Print the covariance matrix of the fitted 6D KDE
@@ -63,24 +63,33 @@ class Intrinsics():
         # return the fitted kde, 1D grid and the sampled data points produced using the 1D grid and KDE
         return kde, x_grid, kde(x_grid)
 
+    def __get_gaussian_1d(self, x):
+        mu, sigma = np.mean(x), np.std(x)
+        x_grid = self.__get_1d_grid(x)
+        y = ( 2.*np.pi*sigma**2. )**-.5 * np.exp( -.5 * (x_grid-mu)**2. / sigma**2. )
+        return (x_grid, y)
 
     def fit_kde_1d(self):
 
         # For the individual intrinsic parameters fir the kde and plot the sampled data from fitted kde
 
-        fig, ax = plt.subplots(3, 2, sharey=True)
+        _, ax = plt.subplots(3, 2, sharey=True)
         colnames = ['Fisheye Coefficient K1', 'Fisheye Coefficient K2', 'Fisheye Coefficient K3', 'Fisheye Coefficient K4', 'Center of Distortion Offset X', 'Center of Distortion Offset Y']
 
         for i, col in enumerate(self.data.columns):
             p = self.data.loc[:,col].values
             
+            # get the kde and data points to plot the kde curve
             p_kde, p_grid, pdf = self.__get_kde_1d(p)
-
             self.__kde_1d_functions.append(p_kde)
+            # get the Gaussian data points to plot the Gaussian curve
+            gaupts = self.__get_gaussian_1d(p)
 
             r = i//2
             c = i%2
             ax[r][c].plot(p_grid, pdf, linewidth=3)
+            ax[r][c].plot(gaupts[0], gaupts[1])
+            ax[r][c].hist(p, 'auto', fc='gray', histtype='stepfilled', alpha=0.3, normed=True)
             ax[r][c].set_xlim(p.min(), p.max())
             ax[r][c].set_title(colnames[i])
             ax[r][c].set_xlabel('value')
