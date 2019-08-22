@@ -128,7 +128,8 @@ class IncidentAngle():
 
 
     # Visualize fitted simulations - generates 3D surface / wireframe / 2D density plot of Incident angle vs Radius
-    def visualize_fit(self, type='density'):
+    # This method also produces pdf plots at a given incident angle
+    def visualize_fit(self, type='density', theta=60):
         if self.__cache is None:
             raise Exception('Fit the data first!!')
 
@@ -157,6 +158,20 @@ class IncidentAngle():
             ax.view_init(azim=-60, elev=-154)
             ax.set_title('Monte Carlo Simulation - Distribution of radius with respect to incident angle')
             plt.show()
+        elif type == 'single':
+            data = self.__r[theta]
+            # produce data points for kde plot
+            x_grid = np.linspace(data.min(), data.max(), 1000)
+            kde = stats.gaussian_kde(data)
+            Y_kde = kde(x_grid)
+            plt.hist(data, 'auto', fc='gray', histtype='stepfilled', alpha=0.3, normed=True)
+            plt.plot(self.__cache['Y'][theta], np.exp(self.__cache['Z'][theta]), label='Gaussian')
+            plt.plot(x_grid, Y_kde, label='KDE')
+            plt.xlabel('Value')
+            plt.ylabel('Probability Density')
+            plt.title('Histogram, Gaussian, and KDE plot of radius at an incident angle '+str(theta) +' degrees')
+            plt.legend(loc='upper right')
+            plt.show()            
         else:
             raise Exception('unknown type parameter')
 

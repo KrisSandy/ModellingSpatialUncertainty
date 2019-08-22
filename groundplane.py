@@ -114,6 +114,45 @@ class GroundPlane():
         plt.show()
 
 
+    # Below method visualizes the fitted kde at a specified pixel location and  camera orientation
+    def visualize_1p(self, px=640, py=483, xdeg=60):
+        if self.__GP is None:
+            raise Exception('Run Monte Carlo Simulations first!!')
+
+        n = 200j
+        # get the indexes of the key
+        i = np.where((self.__KEY[:,0] == px) & (self.__KEY[:,1] == py) & (np.rad2deg(self.__KEY[:,2]).astype(int) == xdeg))[0][0]
+        # get the data using the indexes
+        data = np.vstack([self.__GP[i, 0, :], self.__GP[i, 1, :]])
+        # calculate the metrics
+        fitinfo = self.__fit_single_cluster(px, py, data, returngrid=True)
+        # calculate theta
+        tmin, tmean, tmax = self.__get_theta(px, py)
+
+        # plot the pdf of the fitted kde
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        ax.scatter(data[0], data[1], np.zeros(data.shape[1]), alpha=1)
+        ax.scatter(fitinfo['mean'][0], fitinfo['mean'][1], 0, marker='^', color='green')
+        ax.plot_surface(fitinfo['X'], fitinfo['Y'], fitinfo['Z'], rstride=1, cstride=1, cmap=plt.cm.viridis, linewidth=0.0, alpha=0.75)
+        ax.view_init(azim=-96, elev=7)
+        ax.set_xlabel('X (mm)', labelpad=20)
+        ax.set_ylabel('Y (mm)', labelpad=20)
+        ax.set_zlabel('pd', labelpad=20)
+        siminfo = list()
+        siminfo.append(r'$Pixel$' + ': ({:.0f}, {:.0f})'.format(px, py))
+        siminfo.append(r'$\theta$' + ': {:.2f}'.format(tmean))
+        siminfo.append(r'$\delta\theta$' + ': [{:.2f}, {:.2f}]'.format(tmin, tmax))
+        siminfo.append(r'$\alpha$' + ': {:.2f}'.format(fitinfo['alpha']))
+        siminfo.append(r'$d$' + ': {:.2f}'.format(fitinfo['d']))
+        siminfo.append(r'$a$' + ': {:.2f}'.format(fitinfo['a']))
+        siminfo.append(r'$b$' + ': {:.2f}'.format(fitinfo['b']))
+        plt.title('Monte Carlo simulations of Ground Plane projections\n'+', '.join(siminfo))
+        fig.text(x=-2100, y=2.4, s='Monte Carlo simulations of Ground Plane projections', fontsize=16, weight='bold', ha='center', va='top', transform=ax.transAxes)
+        fig.text(x=-2100, y=2.30, s=', '.join(siminfo), fontsize=13, weight='bold', alpha=0.75, ha='center', va='top', transform=ax.transAxes)
+        plt.show()
+
+
     # Below method generates the visualization of monte carlo simulation with respect to car,
     # scatter plot pf the cluster and KDE of the custer.
     def save_scatters_1p(self, px=640, py=483, save=True):
